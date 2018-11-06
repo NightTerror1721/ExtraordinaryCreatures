@@ -1,0 +1,35 @@
+---
+flag_types:
+    int: &int 0
+    dec_percent: &dec_percent 1
+    byte_percent: &byte_percent 2
+    power: &power 3
+    target: &target 4
+    stat: &stat 5
+    element: &element 6
+    status: &status 7
+    
+effects:
+    0:
+        flags: [*target, *power, *element]
+        description: "Causa daño físico del elemento $2 al $0."
+    
+    1:
+        flags: [*target, *power, *element]
+        description: "Causa daño de energia del elemento $2 al $0."
+    
+    2:
+        flags: [*target, *power]
+        description: "Cura una cierta cantidad de salud al $0."
+    
+    3:
+        flags: [*target, *byte_percent, *element]
+        description: "Causa al $0 un daño equivalente al $1 de su salud, solo si le afecta el elemento $2."
+
+    4:
+        flags: [*target, *dec_percent, *status]
+        description: "$1 de causar $2 al $0."
+
+    5:
+        flags: [*target, *dec_percent, *stat, *byte_percent]
+        description: "$1 de alterar $2 un $3 al $0."
