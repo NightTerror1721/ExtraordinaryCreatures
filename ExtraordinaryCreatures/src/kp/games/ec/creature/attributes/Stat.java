@@ -5,7 +5,6 @@
  */
 package kp.games.ec.creature.attributes;
 
-import java.util.LinkedList;
 import java.util.Objects;
 import kp.games.ec.utils.Formula;
 
@@ -19,7 +18,7 @@ public class Stat
     private int base;
     private int sp;
     private int value;
-    private final LinkedList<StatAlteration> alterations = new LinkedList<>();
+    private float alteration;
     private StatAlteration externAlteration = new StatAlteration(0, 0);
     
     public Stat(StatId id) { this.id = Objects.requireNonNull(id); }
@@ -33,8 +32,8 @@ public class Stat
     
     public final int getValue() { return value; }
     
-    public final void clearAlterations() { alterations.clear(); }
-    public final void addAlteration(StatAlteration alteration) { alterations.add(Objects.requireNonNull(alteration)); }
+    public final void clearAlterations() { alteration = 0f; }
+    public final void addAlteration(float alteration) { this.alteration += alteration; }
     
     public final void clearExternAlteration() { externAlteration.additional = 0; externAlteration.multiplier = 0; }
     public final void addExternAlteration(int points) { this.externAlteration.additional += points; }
@@ -44,14 +43,7 @@ public class Stat
     {
         int original = (int) (Formula.computeStatValue(id, base, sp, level) *
                 computeExternAlterationMultiplier(externAlteration.multiplier)) + externAlteration.additional;
-        int additional = 0;
-        float multiplier = 0f;
-        for(StatAlteration alteration : alterations)
-        {
-            additional += alteration.additional;
-            multiplier += alteration.multiplier;
-        }
-        this.value = (int) ((original + additional) * computeExternAlterationMultiplier(multiplier));
+        this.value = (int) (original * computeExternAlterationMultiplier(alteration));
     }
     
     private static float computeExternAlterationMultiplier(float percentageAlteration) { return Math.max(0.01f, 1 + percentageAlteration); }

@@ -17,6 +17,8 @@ public final class Formula
 {
     private Formula() {}
     
+    public static final int POWER_UNIT = 30;
+    
     public static final int computeStatValue(StatId stat, int base, int sp, int level)
     {
         switch(stat)
@@ -89,7 +91,7 @@ public final class Formula
     private static int toRealPower(int power)
     {
         float fpower = power < 1 ? 1 : power;
-        return (int) (fpower / 30f * 16f);
+        return (int) (fpower / POWER_UNIT * 16f);
     }
     
     public static final int basePhysicDamage(Creature user, Creature target, Element element, int userLevel, int power, int userAttack, int targetDefense)

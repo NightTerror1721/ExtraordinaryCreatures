@@ -8,28 +8,47 @@ flag_types:
     stat: &stat 5
     element: &element 6
     status: &status 7
+
+effect_type:
+    physic: &physic 1
+    energy: &energy 2
+    static: &static 4
+    indirect: &indirect 8
+    state: &state 16
     
 effects:
     0:
+        type: *physic
         flags: [*target, *power, *element]
         description: "Causa daño físico del elemento $2 al $0."
     
     1:
+        type: *energy
         flags: [*target, *power, *element]
         description: "Causa daño de energia del elemento $2 al $0."
     
     2:
+        type: *energy
         flags: [*target, *power]
         description: "Cura una cierta cantidad de salud al $0."
     
     3:
+        type: *static
         flags: [*target, *byte_percent, *element]
         description: "Causa al $0 un daño equivalente al $1 de su salud, solo si le afecta el elemento $2."
 
     4:
+        type: *state
         flags: [*target, *dec_percent, *status]
         description: "$1 de causar $2 al $0."
 
     5:
+        type: *state
         flags: [*target, *dec_percent, *stat, *byte_percent]
         description: "$1 de alterar $2 un $3 al $0."
+    
+    6:
+        type: *physic
+        flags: []
+        description: "Ataque determinado por el arma del Usuario."
+        

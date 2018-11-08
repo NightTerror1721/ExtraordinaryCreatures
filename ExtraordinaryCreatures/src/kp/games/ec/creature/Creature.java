@@ -83,6 +83,14 @@ public final class Creature
     public final Ability getAbility(int index) { return abilities.get(index); }
     public final List<Ability> getAbilities() { return Collections.unmodifiableList(abilities); }
     
+    public final boolean hasAbilityType(int type)
+    {
+        for(Ability ab : abilities)
+            if(ab.hasType(type))
+                return true;
+        return false;
+    }
+    
     
     
     public final void updateAttributeValues()

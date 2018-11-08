@@ -15,7 +15,6 @@ public enum BattleCommandId
     DAMAGE,
     HEAL,
     STAT_MODIF,
-    ELEMENT_EFFECTIVITY_MODIF,
     APPLY_STATUS,
     SLEEP;
 }

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import kp.games.ec.creature.Creature;
-import kp.games.ec.creature.attributes.Element;
 import kp.games.ec.creature.attributes.StatId;
 import kp.games.ec.creature.attributes.StatusId;
 
@@ -62,15 +61,6 @@ public final class BattleCommandManager implements Iterable<BattleCommand>
     public final BattleCommandManager statModif(Creature target, StatId stat, int points)
     {
         return statModif(target.getBattlePositionId(), stat, points);
-    }
-    
-    public final BattleCommandManager elementEffectivityModif(int creatureBattlePositionId, Element element, float percentage)
-    {
-        return addCommand(BattleCommandId.ELEMENT_EFFECTIVITY_MODIF, creatureBattlePositionId, element, percentage);
-    }
-    public final BattleCommandManager elementEffectivityModif(Creature target, Element element, float percentage)
-    {
-        return elementEffectivityModif(target.getBattlePositionId(), element, percentage);
     }
     
     public final BattleCommandManager applyStatus(int creatureBattlePositionId, StatusId stateId, boolean immunity)

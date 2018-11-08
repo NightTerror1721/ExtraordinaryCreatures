@@ -13,8 +13,10 @@ import java.util.Map;
 import kp.games.ec.battle.cmd.BattleCommandManager;
 import kp.games.ec.creature.Creature;
 import kp.games.ec.creature.attributes.Element;
+import kp.games.ec.creature.attributes.Stat;
 import kp.games.ec.creature.attributes.StatId;
 import kp.games.ec.creature.attributes.StatusId;
+import kp.games.ec.utils.Formula;
 import kp.games.ec.utils.RNG;
 import kp.games.ec.utils.Utils;
 import org.yaml.snakeyaml.Yaml;
@@ -46,6 +48,8 @@ public final class AbilityEffect
     
     public final int getId() { return model.id; }
     
+    public final int getType() { return model.type; }
+    
     public final void setFlag(int index, int value) { this.flags[index] = value; desc = null; }
     public final void setFlag(int index, Enum<?> e) { this.flags[index] = e.ordinal(); desc = null; }
     
@@ -64,7 +68,8 @@ public final class AbilityEffect
         switch(model.id)
         {
             case 0: {
-                int damage = ApplyEffect.physicFormula(user, targetFlag(0, user, target), rng, 0, 0, flags[1], elementFlag(2));
+                target = targetFlag(0, user, target);
+                int damage = ApplyEffect.physicFormula(user, target, rng, 0, 0, flags[1], elementFlag(2));
                 ApplyEffect.applyDamage(user, target, bcm, damage);
             } break;
             case 1: {
@@ -81,11 +86,24 @@ public final class AbilityEffect
             } break;
             case 4: {
                 StatusId status = statusFlag(2);
-                if(status != null && rng.d100(flags[1]))
+                if(status != null && checkProb100(rng, 1))
                 {
-                    target = targetFlag(flags[0], user, target);
+                    target = targetFlag(0, user, target);
                     target.getStatus().applyStatus(status, rng, bcm);
                 }
+            } break;
+            case 5: {
+                StatId id = statFlag(2);
+                if(id != null && checkProb100(rng, 1))
+                {
+                    float mod = Formula.bytePercentage(flags[3]);
+                    target = targetFlag(0, user, target);
+                    Stat stat = target.getStat(id);
+                    stat.addAlteration(mod);
+                }
+            } break;
+            case 6: {
+                ApplyEffect.weaponEffect(user, target, rng, bcm);
             } break;
         }
     }
@@ -93,6 +111,37 @@ public final class AbilityEffect
     
     public final int AI_Score(Creature user, Creature target, RNG rng)
     {
+        switch(model.id)
+        {
+            case 0: {
+                target = targetFlag(0, user, target);
+                int damage = ApplyEffect.physicFormula(user, target, rng, 0, 0, flags[1], elementFlag(2));
+                return AIUtils.basicDamage(user, target, rng, damage);
+            }
+            case 1: {
+                target = targetFlag(0, user, target);
+                int damage = ApplyEffect.energyFormula(user, target, rng, 0, 0, flags[1], elementFlag(2));
+                return AIUtils.basicDamage(user, target, rng, damage);
+            }
+            case 2: {
+                target = targetFlag(0, user, target);
+                int damage = ApplyEffect.cureFormula(user, target, rng, 0, flags[1], Element.POSITIVE);
+                return AIUtils.basicDamage(user, target, rng, damage);
+            }
+            case 3: {
+                target = targetFlag(0, user, target);
+                int damage = ApplyEffect.healthPartFormula(user, target, rng, flags[1], elementFlag(2));
+                return AIUtils.basicDamage(user, target, rng, damage);
+            }
+            case 4: {
+                target = targetFlag(0, user, target);
+                return AIUtils.applyAlteredStatus(user, target, rng, statusFlag(2), flags[1]);
+            }
+            case 5: {
+                Creature to = targetFlag(0, user, target);
+                return AIUtils.applyStatAlteration(user, target, rng, statFlag(2), flags[1], flags[3], user == to);
+            }
+        }
         return 0;
     }
     
@@ -120,6 +169,14 @@ public final class AbilityEffect
         return flags[index] == 0 ? target : user;
     }
     
+    private boolean checkProb100(RNG rng, int flagId)
+    {
+        int value = flags[flagId];
+        if(value < 0)
+            return true;
+        return rng.d100(value);
+    }
+    
     
     
     
@@ -138,12 +195,14 @@ public final class AbilityEffect
     private static final class EffectModel
     {
         private final int id;
+        private final int type;
         private final int[] flags;
         private final LinkedList<DescNode> desc;
         
         private EffectModel(int id, Map map)
         {
             this.id = id;
+            this.type = (Integer) map.getOrDefault("type", EFFECT_TYPE_STATE);
             List lflags = (List) map.getOrDefault("flags", Collections.EMPTY_LIST);
             
             this.flags = new int[lflags.size()];
@@ -158,6 +217,7 @@ public final class AbilityEffect
         private EffectModel()
         {
             this.id = -1;
+            this.type = EFFECT_TYPE_STATE;
             this.flags = new int[0];
             this.desc = new LinkedList<>();
         }
@@ -259,6 +319,12 @@ public final class AbilityEffect
     public static final int FLAG_TYPE_STAT = 5;
     public static final int FLAG_TYPE_ELEMENT = 6;
     public static final int FLAG_TYPE_STATUS = 7;
+    
+    public static final int EFFECT_TYPE_PHYSIC = 0x01;
+    public static final int EFFECT_TYPE_ENERGY = 0x02;
+    public static final int EFFECT_TYPE_STATIC = 0x04;
+    public static final int EFFECT_TYPE_INDIRECT = 0x08;
+    public static final int EFFECT_TYPE_STATE = 0x10;
     
     
     private static HashMap<Integer, EffectModel> loadModels()

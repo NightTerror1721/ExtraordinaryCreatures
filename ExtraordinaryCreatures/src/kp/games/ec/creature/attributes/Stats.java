@@ -56,7 +56,7 @@ public final class Stats
             getStat(id).clearAlterations();
     }
     public final void clearAlterations(StatId id) { getStat(id).clearAlterations(); }
-    public final void addAlteration(StatId id, StatAlteration alteration) { getStat(id).addAlteration(alteration); }
+    public final void addAlteration(StatId id, float alteration) { getStat(id).addAlteration(alteration); }
     
     public final void clearExternAlterations()
     {

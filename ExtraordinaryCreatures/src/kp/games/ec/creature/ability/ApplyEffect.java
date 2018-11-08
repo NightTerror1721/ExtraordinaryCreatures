@@ -85,4 +85,10 @@ public final class ApplyEffect
         }
     }
     public static final void applyDamage(Creature user, BattleCommandManager bcm, int damage) { applyDamage(user, user, bcm, damage); }
+    
+    
+    public static final void weaponEffect(Creature user, Creature target, RNG rng, BattleCommandManager bcm)
+    {
+        int damage = physicFormula(user, target, rng, 0, 0, Formula.POWER_UNIT, user.getWeaponDamageElement());
+    }
 }

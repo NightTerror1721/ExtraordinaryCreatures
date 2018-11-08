@@ -123,12 +123,17 @@ public final class Status
     {
         if(enabled)
         {
-            if(isStatusActive(StatusId.SLEEP) || asleepCounter > 0)
+            if(isStatusActive(StatusId.SLEEP) || asleepCounter > 0 || !activateStatus(StatusId.ASLEEP))
                 return;
             asleepCounter = 1;
             bcm.message(self.getName() + " se siente somnoliento.");
         }
-        else asleepCounter = 0;
+        else
+        {
+            if(!deactivateStatus(StatusId.ASLEEP))
+                return;
+            asleepCounter = 0;
+        }
     }
     
     public final void setSleep(BattleCommandManager bcm, int turns)
@@ -303,12 +308,12 @@ public final class Status
     }
     
     
-    public final void blockAttack() { blocked = true; }
-    public final void unblockAttack() { blocked = false; }
-    public final boolean isBlocked() { return blocked; }
+    public final void blockAttack() { activateStatus(StatusId.BLOCKED); }
+    public final void unblockAttack() { deactivateStatus(StatusId.BLOCKED); }
+    public final boolean isBlocked() { return isStatusActive(StatusId.BLOCKED); }
     
-    public final void setDefendMode(boolean flag) { defendMode = flag; }
-    public final boolean isDefendModeEnabled() { return defendMode; }
+    public final void setDefendMode(boolean flag) { activateStatus(StatusId.DEFEND_MODE); }
+    public final boolean isDefendModeEnabled() { return isStatusActive(StatusId.DEFEND_MODE); }
     
     
     public final void updateActiveStatus(RNG rng, BattleCommandManager bcm, boolean beforeAttackMode)
@@ -472,21 +477,19 @@ public final class Status
         }
         else
         {
-            if(blocked)
-                blocked = false;
+            deactivateStatus(StatusId.BLOCKED);
             
             if(asleepCounter > 0)
             {
                 if(asleepCounter > 2)
                 {
                     setSleep(bcm, rng.d7());
-                    asleepCounter = 0;
+                    setSleepiness(bcm, false);
                 }
                 else asleepCounter++;
             }
             
-            if(defendMode)
-                defendMode = false;
+            deactivateStatus(StatusId.DEFEND_MODE);
         }
     }
     
@@ -498,7 +501,7 @@ public final class Status
             case BARRIER: setBarrier(bcm, 5); break;
             case BLOCKED: blockAttack(); break;
             case BURN: setBurn(bcm, true); break;
-            case CONFUSION: setConfusion(rng, bcm, blocked); break;
+            case CONFUSION: setConfusion(rng, bcm, true); break;
             case CURSE: setCurse(bcm, true); break;
             case DEFEND_MODE: setDefendMode(true); break;
             case ENERGY_BARRIER: setEnergyBarrier(bcm, 5); break;
@@ -527,8 +530,6 @@ public final class Status
     
     
     /* Status extra parameters */
-    private boolean blocked;
     private int asleepCounter;
-    private boolean defendMode;
 
 }
