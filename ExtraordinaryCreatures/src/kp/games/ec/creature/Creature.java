@@ -102,7 +102,7 @@ public final class Creature
     
     
     /* Direct path methods */
-    public final int getWeaponAttack() { return weapon != null ? weapon.getAttack() : 0; }
+    public final int getWeaponAttack() { return weapon != null ? weapon.getStrengthBonus(): 0; }
     public final int getWeaponEnergyAttackBonus() { return weapon != null ? weapon.getEnergyAttackBonus() : 0; }
     public final int getWeaponAccuracyBonus() { return weapon != null ? weapon.getAccuracyBonus() : 0; }
     public final Element getWeaponDamageElement() { return weapon != null ? weapon.getDamageElement() : null; }

@@ -8,6 +8,7 @@ package kp.games.ec.creature.ability;
 import kp.games.ec.battle.cmd.BattleCommandManager;
 import kp.games.ec.creature.Creature;
 import kp.games.ec.creature.attributes.Element;
+import kp.games.ec.creature.aw.Weapon;
 import kp.games.ec.utils.Formula;
 import kp.games.ec.utils.RNG;
 
@@ -89,6 +90,29 @@ public final class ApplyEffect
     
     public static final void weaponEffect(Creature user, Creature target, RNG rng, BattleCommandManager bcm)
     {
-        int damage = physicFormula(user, target, rng, 0, 0, Formula.POWER_UNIT, user.getWeaponDamageElement());
+        Weapon weapon = user.getWeapon();
+        if(weapon == null)
+        {
+            int damage = physicFormula(user, target, rng, 0, 0, 1, null);
+            applyDamage(user, target, bcm, damage);
+        }
+        else
+        {
+            int damage = physicFormula(user, target, rng, 0, 0, Formula.POWER_UNIT, user.getWeaponDamageElement());
+            applyDamage(user, target, bcm, damage);
+
+            for(Weapon.StatusModification status : weapon.statusIterable())
+            {
+                float prob;
+                if((prob = status.getProbability()) <= 0)
+                    continue;
+                if(!rng.d100(prob))
+                    continue;
+                target.getStatus().applyStatus(status.getStatus(), rng, bcm);
+            }
+        }
     }
+    
+    
+    public static final boolean checkProb100(RNG rng, int value) { return value < 0 || rng.d100(value); }
 }

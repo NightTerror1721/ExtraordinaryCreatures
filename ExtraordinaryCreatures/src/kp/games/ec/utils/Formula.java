@@ -17,7 +17,7 @@ public final class Formula
 {
     private Formula() {}
     
-    public static final int POWER_UNIT = 30;
+    public static final int POWER_UNIT = 40;
     
     public static final int computeStatValue(StatId stat, int base, int sp, int level)
     {
@@ -101,7 +101,7 @@ public final class Formula
         userAttack = userAttack < 1 ? user.getStatValue(StatId.STRENGTH) +  + user.getWeaponAttack() : userAttack;
         targetDefense = targetDefense < 1 ? target.getStatValue(StatId.DEFENSE) + target.getArmorDefenseBonus() : targetDefense;
         
-        int base = userAttack + ((userAttack + userLevel) / 32) * ((userAttack * userLevel) / 32);
+        int base = (int) (userAttack + ((userAttack + userLevel) / 32f) * ((userAttack * userLevel) / 32f));
         int dam = (power * (512 - targetDefense) * base) / (16 * 512);
         return effectivity(element, target, dam);
     }
@@ -134,6 +134,11 @@ public final class Formula
         int dam = bytePercentage(target.getMaxHealthPoints(), healthBPercentage);
         return effectivity(element, target, dam);
     }
+    
+    /*private static final int damageBase(int base, int tdefense, int power)
+    {
+        
+    }*/
     
     
     public static final int criticalHitModifier(Creature user, Creature target, RNG rng, int points)

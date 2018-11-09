@@ -172,9 +172,7 @@ public final class AbilityEffect
     private boolean checkProb100(RNG rng, int flagId)
     {
         int value = flags[flagId];
-        if(value < 0)
-            return true;
-        return rng.d100(value);
+        return ApplyEffect.checkProb100(rng, value);
     }
     
     
