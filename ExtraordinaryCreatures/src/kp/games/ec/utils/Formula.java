@@ -19,32 +19,40 @@ public final class Formula
     
     public static final int POWER_UNIT = 40;
     
-    public static final int computeStatValue(StatId stat, int base, int sp, int level)
+    public static final int computeStatValue(StatId stat, int base, int sp, int gp, int level)
     {
         switch(stat)
         {
             case HEALTH_POINTS:
-                return (int) (100f +
-                        ((1900f * level) / ((base + 100f) - level * ((1f + (level / 100f)) - (level / 100f)))) +
-                        ((base * level * 70f) / (150f - (level * (1.75f - level / 100f)))) +
-                        (sp * level / 100f));
+                return healthPointsStat(base, sp, gp, level);
             case ENERGY_POINTS:
-                return (int) (25 +
+                /*return (int) (25 +
                         ((level * 75f) / (200f - level * (2f - level / 100f))) +
                         (level) +
                         ((base * level * 3.5f) / (75f - level / 4f)) +
-                        (sp / 4f * level / 100f));
+                        (sp / 4f * level / 100f));*/
+                return (232 + (base * 512 / 100) + (gp * 2) + (sp * 3 / 4)) * level / (200 - level) + 24;
             case CRITICAL_HIT:
             case CRITICAL_HIT_PREVENT:
             case COUNTERATTACK:
             case COUNTERATTACK_PREVENT:
-                return (int) (((base * level) / (175f - level * 0.75f)) + (sp / 16f * level / 100f));
+                return ((base * 128 / 100) + (gp / 2) + (sp / 8)) * level / (400 - level * 3);
             default:
-                return (int) (10 +
-                        (level * 40f / 100f) +
-                        (base * level * 2f / (200f - level * (2f - level / 100f))) +
-                        (sp / 8f * level / 100f));
+                return ((base * 248 / 100) + gp + (sp / 4)) * level / (200 - level) + 8;
         }
+    }
+    
+    
+    private static final int COMMON_BASE = 5120;
+    private static final int SPECIFIC_BASE = COMMON_BASE * 3;
+    private static int healthPointsStat(int base, int sp, int gp, int level)
+    {
+        int filled = 300 - 2 * level;
+        int specific = base * SPECIFIC_BASE / 100;
+        int genetic = gp * 32;
+        int stat = sp * 16;
+        
+        return (COMMON_BASE + specific + genetic + stat) * level / filled;
     }
     
     
@@ -98,11 +106,12 @@ public final class Formula
     {
         power = toRealPower(power);
         userLevel = userLevel < 1 ? user.getLevel() : userLevel;
-        userAttack = userAttack < 1 ? user.getStatValue(StatId.STRENGTH) +  + user.getWeaponAttack() : userAttack;
-        targetDefense = targetDefense < 1 ? target.getStatValue(StatId.DEFENSE) + target.getArmorDefenseBonus() : targetDefense;
+        userAttack = userAttack < 1 ? user.getStatValue(StatId.STRENGTH) : userAttack;
+        targetDefense = targetDefense < 1 ? target.getStatValue(StatId.DEFENSE) : targetDefense;
         
-        int base = (int) (userAttack + ((userAttack + userLevel) / 32f) * ((userAttack * userLevel) / 32f));
-        int dam = (power * (512 - targetDefense) * base) / (16 * 512);
+        /*int base = (int) (userAttack + ((userAttack + userLevel) / 32f) * ((userAttack * userLevel) / 32f));
+        int dam = (power * (512 - targetDefense) * base) / (16 * 512);*/
+        int dam = (int) ((userLevel / 2f) * userAttack * power / (2.25f - (userLevel * 1.25f / 100f)) / targetDefense);
         return effectivity(element, target, dam);
     }
     
@@ -110,11 +119,12 @@ public final class Formula
     {
         power = toRealPower(power);
         userLevel = userLevel < 1 ? user.getLevel() : userLevel;
-        userEAttack = userEAttack < 1 ? user.getStatValue(StatId.ENERGY_POWER) +  + user.getWeaponEnergyAttackBonus(): userEAttack;
-        targetEDefense = targetEDefense < 1 ? target.getStatValue(StatId.ENERGY_DEFENSE) + target.getArmorEnergyDefenseBonus(): targetEDefense;
+        userEAttack = userEAttack < 1 ? user.getStatValue(StatId.ENERGY_POWER) : userEAttack;
+        targetEDefense = targetEDefense < 1 ? target.getStatValue(StatId.ENERGY_DEFENSE) : targetEDefense;
         
-        int base = 6 * (userEAttack + userLevel);
-        int dam = (power * (512 - targetEDefense) * base) / (16 * 512);
+        //int base = 6 * (userEAttack + userLevel);
+        //int dam = (power * (512 - targetEDefense) * base) / (16 * 512);
+        int dam = (int) ((userLevel / 2f) * userEAttack * power / (2.25f - (userLevel * 1.25f / 100f)) / targetEDefense);
         return effectivity(element, target, dam);
     }
     
@@ -124,8 +134,9 @@ public final class Formula
         userLevel = userLevel < 1 ? user.getLevel() : userLevel;
         userEAttack = userEAttack < 1 ? user.getStatValue(StatId.ENERGY_POWER) +  + user.getWeaponEnergyAttackBonus(): userEAttack;
         
-        int base = 6 * (userEAttack + userLevel);
-        int dam = base + 22 * power;
+        //int base = 6 * (userEAttack + userLevel);
+        //int dam = base + 22 * power;
+        int dam = (userEAttack + userLevel) * power / 6;
         return effectivity(element, target, dam);
     }
     
@@ -134,11 +145,6 @@ public final class Formula
         int dam = bytePercentage(target.getMaxHealthPoints(), healthBPercentage);
         return effectivity(element, target, dam);
     }
-    
-    /*private static final int damageBase(int base, int tdefense, int power)
-    {
-        
-    }*/
     
     
     public static final int criticalHitModifier(Creature user, Creature target, RNG rng, int points)

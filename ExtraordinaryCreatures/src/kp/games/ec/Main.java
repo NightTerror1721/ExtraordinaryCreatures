@@ -38,7 +38,7 @@ public final class Main
             System.out.println("Level " + i + ":");
             
             for(StatId stat : StatId.iterable())
-                System.out.println("\t" + stat.getName() + ": " + Formula.computeStatValue(stat, 100, 0, i));
+                System.out.println("\t" + stat.getName() + ": " + Formula.computeStatValue(stat, 150, 256, 32, i));
             
             System.out.println();
         }
